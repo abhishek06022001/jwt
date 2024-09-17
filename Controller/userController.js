@@ -4,9 +4,20 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const saltRounds = 10;
 const userController = {
+  show_role: (req, res) => {
+    const role = req.user.role;
+    return res.status(200).json({ msg: "Role id is" + role });
+  },
+  show_id: (req, res) => {
+    const user_id = req.user.id;
+
+    return res.status(200).json({ msg: "User id is" + user_id });
+  },
+
   test_path: (req, res) => {
-    const cookie = res.cookie;
-    return res.status(200).json({ msg: cookie });
+    // get old accesstoken and return new ACT and RFT
+    const cookie = req.cookies["refreshToken"];
+    return res.status(200).json({ refreshToken: cookie });
   },
   login: async (req, res) => {
     try {
