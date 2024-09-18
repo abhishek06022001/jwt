@@ -4,20 +4,31 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const saltRounds = 10;
 const userController = {
+  access_token: (req, res) => {
+    // call when access token has exFpired dude
+    const token = req.cookies["refreshToken"];
+    const user = jwt.verify(token, "refreshToken");
+    const newAccessToken = createAccessToken({ id: user.id });
+    const refreshToken = createRefreshToken({ id: user.id });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      path: "/access_token",
+    });
+    return res.status(200).json({ msg: newAccessToken });
+  },
   show_role: (req, res) => {
     const role = req.user.role;
     return res.status(200).json({ msg: "Role id is" + role });
   },
   show_id: (req, res) => {
     const user_id = req.user.id;
-
     return res.status(200).json({ msg: "User id is" + user_id });
   },
 
   test_path: (req, res) => {
     // get old accesstoken and return new ACT and RFT
-    const cookie = req.cookies["refreshToken"];
-    return res.status(200).json({ refreshToken: cookie });
+    // const cookie = req.cookies["refreshToken"];
+    // return res.status(200).json({ refreshToken: cookie });
   },
   login: async (req, res) => {
     try {
@@ -37,7 +48,7 @@ const userController = {
           //send refreshToken to cookies to generate a new accessToken
           res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            path: "/api/test_path",
+            path: "/access_token",
             // The cookie is sent to the server only for requests that match the path specified.
           });
           return res.status(200).json({
@@ -56,7 +67,7 @@ const userController = {
   },
   logout: async (req, res) => {
     try {
-      res.clearCookie("refreshToken", { path: "/api/test_path" });
+      res.clearCookie("refreshToken");
 
       return res.status(200).json({ msg: "logged out" });
     } catch (error) {

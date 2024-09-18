@@ -6,13 +6,13 @@ const auth = (req, res, next) => {
     let user = jwt.verify(token, "accessToken");
     console.log("The user is", user);
     if (!user)
-      return res.status(400).send("Access Denied");
+      return res.status(400).send("Access Denied Altered Token");
     req.user = user;
     //user has only id in this case
     //id needs protection hence we are first authenticating it
     next();
   } catch (error) {
-    return res.status(500).send("Access Denied / Unauthorized request");
+    return res.status(500).send("Access Denied Altered Token");
   }
 };
 module.exports = auth;
